@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project History - Confluence PDF Exporter</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: linear-gradient(135deg, #fdfcfb 0%, #f5f0ff 50%, #fef9f4 100%);
+            color: #2d3748;
+            padding: 40px 20px;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 860px;
+            margin: 0 auto;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 48px;
+        }
+        header h1 {
+            font-size: 32px;
+            font-weight: 700;
+            color: #1a202c;
+            margin-bottom: 8px;
+        }
+        header p {
+            font-size: 15px;
+            color: #718096;
+        }
+        .timeline {
+            position: relative;
+            padding-left: 36px;
+        }
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 14px;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: linear-gradient(to bottom, #E8A0BF, #7B8EC8, #A0D2DB);
+            border-radius: 2px;
+        }
+        .step {
+            position: relative;
+            margin-bottom: 36px;
+        }
+        .step::before {
+            content: '';
+            position: absolute;
+            left: -28px;
+            top: 6px;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            border: 3px solid #7B8EC8;
+            background: #fff;
+        }
+        .step.user::before { border-color: #E8A0BF; }
+        .step.bot::before { border-color: #7B8EC8; }
+
+        .step-label {
+            display: inline-block;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 2px 10px;
+            border-radius: 10px;
+            margin-bottom: 8px;
+        }
+        .step.user .step-label { background: #FDE8F0; color: #C05080; }
+        .step.bot .step-label { background: #E8EEFF; color: #5060A0; }
+
+        .step-card {
+            background: #fff;
+            border-radius: 12px;
+            padding: 20px 24px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+            border: 1px solid #f0eef5;
+        }
+        .step-card h3 {
+            font-size: 17px;
+            font-weight: 600;
+            color: #1a202c;
+            margin-bottom: 10px;
+        }
+        .step-card p, .step-card li {
+            font-size: 14px;
+            line-height: 1.7;
+            color: #4a5568;
+        }
+        .step-card ul {
+            padding-left: 20px;
+            margin-top: 8px;
+        }
+        .step-card li { margin: 4px 0; }
+        .step-card code {
+            background: #f7f5fa;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 13px;
+            color: #805ad5;
+        }
+        .badge {
+            display: inline-block;
+            font-size: 11px;
+            padding: 2px 8px;
+            border-radius: 4px;
+            margin-left: 6px;
+            font-weight: 600;
+        }
+        .badge-done { background: #E6FFFA; color: #2C7A7B; }
+        .badge-key { background: #FEFCBF; color: #975A16; }
+        footer {
+            text-align: center;
+            margin-top: 48px;
+            font-size: 12px;
+            color: #a0aec0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Confluence PDF Exporter</h1>
+            <p>Project History &mdash; 사용자 요청 &amp; Claude 구현 기록</p>
+        </header>
+
+        <div class="timeline">
+
+            <!-- Step 1 -->
+            <div class="step user">
+                <div class="step-label">User Request</div>
+                <div class="step-card">
+                    <h3>1. Confluence PDF 품질 개선 요청 <span class="badge badge-key">2026-03-04</span></h3>
+                    <p>Confluence Cloud의 기본 PDF exporter 출력이 이쁘지 않고, 특히 코드블록에 행번호가 보이지 않는 문제를 해결하고 싶다. MCP를 이용해 Confluence에 접속하여 페이지를 HTML/PDF로 변환할 수 있는지 문의.</p>
+                    <ul>
+                        <li>Domain: <code>https://pinkwink.atlassian.net/</code></li>
+                        <li>출력 형식: HTML + PDF 둘 다</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Step 2 -->
+            <div class="step bot">
+                <div class="step-label">Claude Implementation</div>
+                <div class="step-card">
+                    <h3>2. 접근 방법 설계 및 계획 수립 <span class="badge badge-key">Plan</span></h3>
+                    <p>3가지 접근 방법(Confluence REST API + 스크립트, Confluence MCP Server, WebFetch) 중 <strong>REST API + Python 스크립트</strong> 방식을 선택.</p>
+                    <ul>
+                        <li>conda 환경 <code>confluence</code> 생성 (Python 3.11)</li>
+                        <li>패키지: <code>requests</code>, <code>beautifulsoup4</code>, <code>playwright</code>, <code>python-dotenv</code></li>
+                        <li>Playwright Chromium으로 PDF 렌더링</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Step 3 -->
+            <div class="step bot">
+                <div class="step-label">Claude Implementation</div>
+                <div class="step-card">
+                    <h3>3. 핵심 스크립트 작성 <span class="badge badge-done">Done</span></h3>
+                    <p><code>confluence_export.py</code> 작성 &mdash; 주요 기능:</p>
+                    <ul>
+                        <li>Confluence REST API v2/v1 자동 전환</li>
+                        <li>URL에서 page ID 자동 추출</li>
+                        <li>코드블록 행번호 추가 (<code>&lt;ac:structured-macro&gt;</code> &rarr; styled HTML)</li>
+                        <li>이미지 base64 인라인 임베딩</li>
+                        <li>패널, 이모티콘, 링크, 상태 뱃지 등 매크로 변환</li>
+                        <li>Playwright Chromium으로 PDF 생성</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Step 4 -->
+            <div class="step bot">
+                <div class="step-label">Claude Implementation</div>
+                <div class="step-card">
+                    <h3>4. 이미지 다운로드 경로 수정 <span class="badge badge-done">Bug Fix</span></h3>
+                    <p>Confluence Cloud의 이미지 다운로드 URL에 <code>/wiki</code> prefix가 필요함을 발견. <code>download_image()</code> 함수 수정으로 모든 첨부 이미지 정상 로드.</p>
+                </div>
+            </div>
+
+            <!-- Step 5 -->
+            <div class="step user">
+                <div class="step-label">User Request</div>
+                <div class="step-card">
+                    <h3>5. 커버 페이지 + 목차 페이지 추가 요청 <span class="badge badge-key">2026-03-04</span></h3>
+                    <p>제목 페이지(PinkLAB 로고 + 제목)와 목차 페이지를 만들어달라. 테스트 페이지에 다시 적용 요청.</p>
+                </div>
+            </div>
+
+            <!-- Step 6 -->
+            <div class="step bot">
+                <div class="step-label">Claude Implementation</div>
+                <div class="step-card">
+                    <h3>6. 커버 &amp; 목차 페이지 구현 <span class="badge badge-done">Done</span></h3>
+                    <ul>
+                        <li><strong>커버 페이지</strong>: PinkLAB 로고 + 제목 중앙 정렬, page-break</li>
+                        <li><strong>목차 페이지</strong>: h1~h4 헤딩을 계층적 번호(1.1, 1.1.1...)로 정리, 앵커 링크 연결</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Step 7 -->
+            <div class="step user">
+                <div class="step-label">User Request</div>
+                <div class="step-card">
+                    <h3>7. 레이아웃 개선 + 마지막 페이지 + 문서화 요청 <span class="badge badge-key">2026-03-04</span></h3>
+                    <ul>
+                        <li>PinkLAB 로고를 페이지 하단 3/4 지점으로 이동</li>
+                        <li>마지막 페이지에 YouTube 채널 (<code>@pinklab_studio</code>) 홍보</li>
+                        <li><code>history.html</code>: 프로젝트 히스토리</li>
+                        <li><code>architecture.html</code>: 코드 구조 문서</li>
+                        <li><code>README.md</code>: 사용법 및 dependency</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Step 8 -->
+            <div class="step bot">
+                <div class="step-label">Claude Implementation</div>
+                <div class="step-card">
+                    <h3>8. 최종 구현 <span class="badge badge-done">Done</span></h3>
+                    <ul>
+                        <li>커버 페이지 &mdash; 제목+메타를 상단 3/4, 로고를 하단 1/4에 배치</li>
+                        <li>마지막 페이지 &mdash; PinkLAB 로고, YouTube 구독 버튼, 채널 URL 홍보</li>
+                        <li>문서 3건 작성 완료</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Step 9 -->
+            <div class="step user">
+                <div class="step-label">User Request</div>
+                <div class="step-card">
+                    <h3>9. 프레젠테이션 모드 요청 <span class="badge badge-key">2026-03-05</span></h3>
+                    <p>Confluence 페이지를 슬라이드 형태의 발표 자료로도 변환할 수 있게 해달라. H1/H2는 타이틀 슬라이드, H3+는 콘텐츠 슬라이드로 분리.</p>
+                </div>
+            </div>
+
+            <!-- Step 10 -->
+            <div class="step bot">
+                <div class="step-label">Claude Implementation</div>
+                <div class="step-card">
+                    <h3>10. 프레젠테이션 모드 구현 <span class="badge badge-done">Done</span></h3>
+                    <ul>
+                        <li><strong>슬라이드 HTML</strong>: 16:9 레이아웃, topbar(섹션명 + 제목 + 로고) + footer(저자 + 페이지번호)</li>
+                        <li><strong>키보드 네비게이션</strong>: Space/화살표/PageUp/Down/Home/End + 마우스 휠</li>
+                        <li><strong>슬라이드 PDF</strong>: 1280&times;720px 페이지 사이즈</li>
+                        <li>비디오 첨부파일 자동 다운로드 &amp; <code>&lt;video&gt;</code> 태그 재생 지원</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Step 11 -->
+            <div class="step user">
+                <div class="step-label">User Request</div>
+                <div class="step-card">
+                    <h3>11. 사용법 정리 + 문서 업데이트 요청 <span class="badge badge-key">2026-03-05</span></h3>
+                    <p>토큰을 <code>.env</code> 대신 <code>confluence_token.txt</code>로 관리하도록 변경. 출력물을 Document PDF + Presentation HTML + Presentation PDF 3개로 정리.</p>
+                </div>
+            </div>
+
+            <!-- Step 12 -->
+            <div class="step bot">
+                <div class="step-label">Claude Implementation</div>
+                <div class="step-card">
+                    <h3>12. 최종 정리 <span class="badge badge-done">Done</span></h3>
+                    <ul>
+                        <li><code>python-dotenv</code> 의존성 제거, <code>confluence_token.txt</code> 직접 파싱</li>
+                        <li>출력물 3개로 정리 (Document HTML 제거)</li>
+                        <li><code>README.md</code> 전면 재작성, <code>history.html</code>, <code>architecture.html</code> 업데이트</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Step 13 -->
+            <div class="step user">
+                <div class="step-label">User Request</div>
+                <div class="step-card">
+                    <h3>13. 프레젠테이션 이미지 확대 + 표지 메타정보 제거 요청 <span class="badge badge-key">2026-03-05</span></h3>
+                    <ul>
+                        <li>프레젠테이션에서 원본 크기가 작은 이미지가 그대로 작게 표시되는 문제 &mdash; 슬라이드에 맞게 확대해달라</li>
+                        <li>표지 슬라이드에서 &ldquo;Exported from Confluence&rdquo;, URL, 날짜 등 메타 정보를 제거해달라</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Step 14 -->
+            <div class="step bot">
+                <div class="step-label">Claude Implementation</div>
+                <div class="step-card">
+                    <h3>14. 프레젠테이션 이미지 확대 &amp; 표지 정리 <span class="badge badge-done">Done</span></h3>
+                    <ul>
+                        <li><strong>이미지 확대</strong>: <code>build_presentation_html()</code>에서 이미지의 inline <code>width</code>/<code>height</code> 속성 제거, CSS에 <code>min-height: 200px</code> 추가</li>
+                        <li><strong>표지 정리</strong>: 표지 슬라이드에서 <code>cover-meta</code> 영역 제거 &mdash; 제목 + 구분선 + 로고만 표시</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Step 15 -->
+            <div class="step user">
+                <div class="step-label">User Request</div>
+                <div class="step-card">
+                    <h3>15. 문서 PDF 표지에서도 메타정보 제거 요청 <span class="badge badge-key">2026-03-05</span></h3>
+                    <p>수업자료용 문서 PDF의 표지에 표시되는 &ldquo;Exported from Confluence&rdquo;, URL, 날짜 정보도 제거해달라.</p>
+                </div>
+            </div>
+
+            <!-- Step 16 -->
+            <div class="step bot">
+                <div class="step-label">Claude Implementation</div>
+                <div class="step-card">
+                    <h3>16. 문서 PDF 표지 메타정보 제거 <span class="badge badge-done">Done</span></h3>
+                    <ul>
+                        <li><code>build_cover_page()</code>에서 <code>cover-meta</code> div 전체 제거</li>
+                        <li>불필요해진 <code>from datetime import date</code> 및 <code>today</code> 변수 정리</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Step 17 -->
+            <div class="step user">
+                <div class="step-label">User Request</div>
+                <div class="step-card">
+                    <h3>17. 특정 페이지 이미지 깨짐 문제 보고 <span class="badge badge-key">2026-03-06</span></h3>
+                    <p>특정 페이지를 변환할 때 이미지가 모두 깨지는 문제 보고. Confluence가 파일명을 <code>UNKNOWN_ATTACHMENT</code>로 저장하는 버그가 원인.</p>
+                </div>
+            </div>
+
+            <!-- Step 18 -->
+            <div class="step bot">
+                <div class="step-label">Claude Investigation</div>
+                <div class="step-card">
+                    <h3>18. UNKNOWN_ATTACHMENT fallback 처리 <span class="badge badge-done">Bug Fix</span></h3>
+                    <p><strong>원인:</strong> Confluence Cloud에서 이미지를 인라인 붙여넣기할 때 간혹 <code>ri:filename="UNKNOWN_ATTACHMENT"</code>로 저장되는 버그. <code>ac:alt</code>에는 실제 파일명이 있음.</p>
+                    <ul>
+                        <li><code>process_images()</code>에서 <code>ri:filename</code>이 <code>UNKNOWN_ATTACHMENT</code>일 때 <code>ac:alt</code>에서 실제 파일명을 추출하여 사용하도록 수정</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Step 19 -->
+            <div class="step user">
+                <div class="step-label">User Request</div>
+                <div class="step-card">
+                    <h3>19. 프레젠테이션 TOC 네비게이션 요청 <span class="badge badge-key">2026-03-07</span></h3>
+                    <p>프레젠테이션 HTML에서 단축키를 누르면 목차(H1, H2, H3)가 팝업으로 표시되어, 원하는 슬라이드로 바로 점프할 수 있는 기능 요청.</p>
+                </div>
+            </div>
+
+            <!-- Step 20 -->
+            <div class="step bot">
+                <div class="step-label">Claude Implementation</div>
+                <div class="step-card">
+                    <h3>20. TOC 네비게이션 구현 <span class="badge badge-done">Done</span></h3>
+                    <ul>
+                        <li><strong>TOC 오버레이</strong>: <code>T</code> 키로 토글되는 플로팅 패널 &mdash; H1/H2/H3 헤딩을 계층적으로 표시</li>
+                        <li><strong>키보드 조작</strong>: 화살표 키로 항목 선택, Enter로 해당 슬라이드 이동, T/Escape로 닫기</li>
+                        <li><strong>시각 디자인</strong>: 반투명 배경, 애니메이션 패널, 현재 슬라이드 하이라이트, 페이지 번호 표시</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Step 21 -->
+            <div class="step user">
+                <div class="step-label">User Request</div>
+                <div class="step-card">
+                    <h3>21. 프레젠테이션 Panel 슬라이드 채움 요청 <span class="badge badge-key">2026-03-09</span></h3>
+                    <p>H3 콘텐츠 슬라이드에서 Panel 매크로(Info/Note/Warning 등)로 만들어진 글 상자가 너무 작게 표시되어 슬라이드 대부분이 비어 보이는 문제. 패널이 슬라이드에 꽉 차게 확대되도록 요청.</p>
+                </div>
+            </div>
+
+            <!-- Step 22 -->
+            <div class="step bot">
+                <div class="step-label">Claude Implementation</div>
+                <div class="step-card">
+                    <h3>22. Panel 자동 확장 구현 <span class="badge badge-done">Done</span></h3>
+                    <ul>
+                        <li><strong>Panel flex 확장</strong>: <code>.confluence-panel</code>, <code>.confluence-custom-panel</code>에 <code>flex: 1; width: 100%</code> 적용</li>
+                        <li><strong>content-inner flex</strong>: <code>.content-inner</code>에 <code>flex: 1; width: 100%</code> 추가</li>
+                        <li><strong>글자 크기 확대</strong>: 패널 폰트 14px &rarr; 18px, 패딩 12px &rarr; 20px, 테두리 4px &rarr; 5px</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Step 23 -->
+            <div class="step user">
+                <div class="step-label">User Request</div>
+                <div class="step-card">
+                    <h3>23. 웹 GUI 요청 <span class="badge badge-key">2026-03-10</span></h3>
+                    <p>CLI 대신 웹 브라우저 기반 GUI로 사용할 수 있도록 요청. 페이지 URL 입력, 커스텀 로고 업로드, 출력 디렉토리 및 파일명 지정 기능.</p>
+                </div>
+            </div>
+
+            <!-- Step 24 -->
+            <div class="step bot">
+                <div class="step-label">Claude Implementation</div>
+                <div class="step-card">
+                    <h3>24. 웹 GUI 구현 (Flask) <span class="badge badge-done">Done</span></h3>
+                    <ul>
+                        <li><strong>서버</strong>: Flask 선택 &mdash; 가볍고, conda에서 쉽게 설치 가능</li>
+                        <li><strong><code>app.py</code></strong>: Flask 서버, REST API 엔드포인트 (export, status polling, logo upload/reset)</li>
+                        <li><strong><code>templates/index.html</code></strong>: 단일 페이지 웹 UI, 밝은 디자인, 실시간 진행 로그</li>
+                        <li><strong>커스텀 로고</strong>: 기본 PinkLAB 로고 또는 사용자 업로드 로고 선택</li>
+                        <li><strong>커스텀 파일명</strong>: 3개 출력 파일 이름을 사용자가 직접 지정 가능, 확장자 자동 보정</li>
+                        <li><strong>Static 파일</strong>: <code>static/</code> 디렉토리에 로고 심링크로 프리뷰 제공</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Step 25 -->
+            <div class="step user">
+                <div class="step-label">User Request</div>
+                <div class="step-card">
+                    <h3>25. 출력 파일 열기 링크 + 파일별 생성 토글 <span class="badge badge-key">2026-03-10</span></h3>
+                    <ul>
+                        <li>Export 완료 후 생성된 3개 파일을 바로 브라우저에서 열어볼 수 있는 링크 제공</li>
+                        <li>Output Settings에 체크박스를 추가하여 각 파일의 생성 여부를 선택할 수 있도록 (디폴트: 모두 선택)</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Step 26 -->
+            <div class="step bot">
+                <div class="step-label">Claude Implementation</div>
+                <div class="step-card">
+                    <h3>26. 파일 열기 링크 &amp; 생성 토글 구현 <span class="badge badge-done">Done</span></h3>
+                    <ul>
+                        <li><strong>Open 링크</strong>: 결과 파일마다 "Open" 버튼 추가 &mdash; <code>GET /api/files/&lt;path&gt;</code> 라우트로 새 탭에서 열람</li>
+                        <li><strong>체크박스 토글</strong>: 각 출력 파일(Document PDF, Presentation HTML, Presentation PDF)에 체크박스. 해제 시 파일명 입력 비활성화 + 생성 스킵</li>
+                        <li><strong>스킵 로직</strong>: <code>enable_doc_pdf</code>, <code>enable_present_html</code>, <code>enable_present_pdf</code> 플래그를 API에 전달. Presentation PDF만 선택 시 임시 HTML 생성 후 삭제</li>
+                        <li><strong>Validation</strong>: 3개 모두 해제 시 에러 반환</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Step 27 -->
+            <div class="step user">
+                <div class="step-label">User Request</div>
+                <div class="step-card">
+                    <h3>27. 문서 정리 + macOS 런처 <span class="badge badge-key">2026-03-10</span></h3>
+                    <ul>
+                        <li><code>history.html</code>을 한글로 유지</li>
+                        <li>conda 활성화 + app.py 실행 + 브라우저 열기를 한 번에 처리하는 macOS 바로가기 생성</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Step 28 -->
+            <div class="step bot">
+                <div class="step-label">Claude Implementation</div>
+                <div class="step-card">
+                    <h3>28. 문서 한글화 &amp; macOS 런처 <span class="badge badge-done">Done</span></h3>
+                    <ul>
+                        <li><code>history.html</code> 전체를 한글로 재작성 (#23~#28 포함)</li>
+                        <li><code>start.command</code>: 더블클릭으로 conda 활성화 &rarr; Flask 서버 시작 &rarr; 브라우저 자동 오픈</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Step 29 -->
+            <div class="step user">
+                <div class="step-label">User Request</div>
+                <div class="step-card">
+                    <h3>29. 프레젠테이션 코드블록 &amp; H3 제목 개선 요청 <span class="badge badge-key">2026-03-13</span></h3>
+                    <ul>
+                        <li>프레젠테이션 코드블록이 다크 테마 &mdash; 밝은 테마로 변경 요청</li>
+                        <li>코드블록 줄간격을 1.2배로 변경 (행번호는 원래대로 유지)</li>
+                        <li>글자 크기를 약 12px 수준으로</li>
+                        <li>내용 없이 H3 제목만 있는 경우, H2와 동일한 타이틀 슬라이드로 표시</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Step 30 -->
+            <div class="step bot">
+                <div class="step-label">Claude Implementation</div>
+                <div class="step-card">
+                    <h3>30. 밝은 코드 테마 &amp; H3 타이틀 슬라이드 <span class="badge badge-done">Done</span></h3>
+                    <ul>
+                        <li><strong>코드블록 라이트 테마</strong>: 배경 <code>#2d2d2d</code> &rarr; <code>#F8F9FA</code>, 헤더 <code>#404040</code> &rarr; <code>#EDF2F7</code>, 텍스트 <code>#e0e0e0</code> &rarr; <code>#2D3748</code>, 테두리 추가</li>
+                        <li><strong>줄간격</strong>: 코드 텍스트 line-height 1.5 &rarr; 1.2 (행번호는 1.5 유지)</li>
+                        <li><strong>H3 타이틀 슬라이드</strong>: 내용 없는 H3 헤딩을 <code>slide-heading</code>으로 렌더링 (H1/H2와 동일한 시각적 표현), TOC 레벨은 <code>h3</code> 유지</li>
+                    </ul>
+                </div>
+            </div>
+
+        </div>
+
+        <footer>
+            Built with Claude Code (Claude Opus 4.6) &middot; 2026-03-13
+        </footer>
+    </div>
+</body>
+</html>
