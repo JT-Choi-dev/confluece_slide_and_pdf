@@ -154,5 +154,5 @@ confluence_print/
 | Others | Graceful fallback (body content preserved) |
 
 ## VIDEO
-![YOUTUBE](https://www.youtube.com/watch?v=VcSHt-2HNkY)
+[![YOUTUBE](https://img.youtube.com/vi/VcSHt-2HNkY/0.jpg)](https://www.youtube.com/watch?v=VcSHt-2HNkY)
 
