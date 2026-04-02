@@ -152,3 +152,7 @@ confluence_print/
 | `ac:link` | Standard HTML `<a>` tags |
 | `ac:emoticon` | Unicode emoji |
 | Others | Graceful fallback (body content preserved) |
+
+## VIDEO
+![YOUTUBE](https://www.youtube.com/watch?v=VcSHt-2HNkY)
+
