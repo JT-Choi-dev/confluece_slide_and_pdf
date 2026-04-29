@@ -31,7 +31,7 @@ It addresses the limitations of Confluence's built-in PDF exporter (e.g., missin
 ### 1. Clone
 
 ```bash
-git clone https://github.com/JT-Choi-dev/confluece_slide_and_pdf
+git clone https://github.com/PinkWink/confluece_slide_and_pdf
 cd confluece_slide_and_pdf
 ```
 
