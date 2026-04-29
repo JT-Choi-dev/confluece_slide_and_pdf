@@ -6,7 +6,7 @@ It addresses the limitations of Confluence's built-in PDF exporter (e.g., missin
 
 ## Features
 
-- **Web GUI** — Browser-based interface (Flask) with real-time progress
+- **Web GUI** — Browser-based interface (Flask) with real-time progress bar
 - **Document PDF** — Cover page + auto-generated TOC + body + back page
 - **Presentation HTML** — Slide-based presentation (keyboard/mouse navigation)
 - **Presentation PDF** — 16:9 slide PDF
@@ -20,58 +20,34 @@ It addresses the limitations of Confluence's built-in PDF exporter (e.g., missin
 ## Prerequisites
 
 - Confluence Cloud account + API Token
-- **macOS**: [Conda](https://docs.conda.io/) (Miniconda or Anaconda)
-- **Windows**: Python 3.10+ (no Conda required)
+- **Python 3.10+** (venv 사용 시) 또는 **Conda** (Miniconda / Anaconda)
+- macOS / Windows 모두 지원, conda와 venv 모두 지원
+
+> 런처 스크립트가 conda 설치 여부를 **자동으로 감지**합니다.
+> conda가 있으면 conda를, 없으면 venv를 자동으로 사용합니다.
 
 ## Setup
 
-### macOS — Conda
-
-#### 1. Create Conda Environment
-
-```bash
-conda create -n confluence python=3.11 -y
-conda activate confluence
-```
-
-#### 2. Install Packages
-
-```bash
-pip install requests beautifulsoup4 playwright flask
-playwright install chromium
-```
-
-#### 3. Configure Authentication
-
-Create a `confluence_token.txt` file in the project root:
-
-```
-CONFLUENCE_URL=https://your-domain.atlassian.net
-CONFLUENCE_EMAIL=your-email@example.com
-CONFLUENCE_API_TOKEN=your-api-token-here
-```
-
-> You can generate an API Token at [Atlassian API Token Management](https://id.atlassian.com/manage-profile/security/api-tokens).
-
----
-
-### Windows — Python venv
-
-> Conda 없이 Python 기본 가상환경(venv)으로 실행할 수 있습니다.
-
-#### 1. Clone & Setup (최초 1회)
+### 1. Clone
 
 ```bash
 git clone https://github.com/JT-Choi-dev/confluece_slide_and_pdf
 cd confluece_slide_and_pdf
 ```
 
-`setup.bat`을 더블클릭하면 자동으로:
-- `venv` 가상환경 생성
+### 2. 초기 설정 (최초 1회)
+
+| OS | 실행 파일 | 방법 |
+|----|-----------|------|
+| macOS | `setup.sh` | 터미널에서 `chmod +x setup.sh && ./setup.sh` |
+| Windows | `setup.bat` | 더블클릭 |
+
+실행하면 conda / venv를 자동 감지하여:
+- 가상환경 생성 (`confluence` 또는 `venv/`)
 - 패키지 설치 (`requirements.txt`)
 - Playwright Chromium 설치
 
-#### 2. Configure Authentication
+### 3. 인증 설정
 
 프로젝트 루트에 `confluence_token.txt` 파일 생성:
 
@@ -81,9 +57,36 @@ CONFLUENCE_EMAIL=your-email@example.com
 CONFLUENCE_API_TOKEN=your-api-token-here
 ```
 
-#### 3. Run
+> API Token 발급: [Atlassian API Token Management](https://id.atlassian.com/manage-profile/security/api-tokens)
 
-`start.bat`을 더블클릭하면 자동으로 venv를 활성화하고 브라우저에서 http://localhost:5001 을 열어줍니다.
+### 4. 실행
+
+| OS | 실행 파일 | 방법 |
+|----|-----------|------|
+| macOS | `start.sh` 또는 `Conf. Exporter.command` | 터미널 또는 Finder에서 더블클릭 |
+| Windows | `start.bat` | 더블클릭 |
+
+브라우저에서 **http://localhost:5001** 자동으로 열립니다.
+
+---
+
+## 환경별 동작 방식
+
+### macOS
+
+```
+conda 설치됨?
+  ├── YES → conda activate confluence → python app.py
+  └── NO  → source venv/bin/activate  → python app.py
+```
+
+### Windows
+
+```
+conda 설치됨?
+  ├── YES → conda activate confluence → python app.py
+  └── NO  → venv\Scripts\activate    → python app.py
+```
 
 ---
 
@@ -91,61 +94,51 @@ CONFLUENCE_API_TOKEN=your-api-token-here
 
 ### Web GUI (Recommended)
 
-**macOS** — double-click `Conf. Exporter.command` in Finder.
-
-**Windows** — double-click `start.bat`.
-
-Or manually:
-
-```bash
-# macOS
-conda activate confluence
-python app.py
-
-# Windows
-venv\Scripts\activate
-python app.py
-```
-
 Open **http://localhost:5001** in your browser. The GUI provides:
 
-- Confluence page URL input
-- Logo selection (default PinkLAB logo, or upload a custom logo)
+- Confluence page URL input + Export 버튼 (URL 바로 아래)
+- 실시간 프로그레스 바 (단계별 % 표시)
+- "자세히 보기" 클릭 시 상세 로그 확인
+- Logo selection (default PinkLAB logo, or upload custom)
 - Output directory configuration (default: `~/Downloads`)
-- Per-file generation toggle (checkbox to enable/disable each output)
+- Per-file generation toggle (Document PDF / Presentation HTML / PDF)
 - Custom filenames for all 3 output files
-- Real-time export progress log
 - Direct "Open" links to view generated files in browser
 
 ### CLI
 
 ```bash
-# macOS
+# macOS (conda)
 conda activate confluence
+python confluence_export.py "PAGE_URL"
 
-# Windows
+# macOS (venv)
+source venv/bin/activate
+python confluence_export.py "PAGE_URL"
+
+# Windows (conda)
+conda activate confluence
+python confluence_export.py "PAGE_URL"
+
+# Windows (venv)
 venv\Scripts\activate
+python confluence_export.py "PAGE_URL"
 
-# Basic usage
-python confluence_export.py "https://your-domain.atlassian.net/wiki/spaces/SPACE/pages/PAGE_ID/Page+Title"
-
-# Specify output directory
+# 출력 디렉토리 지정
 python confluence_export.py "PAGE_URL" --output-dir ./my_output
 ```
 
 ### Output
 
-Three files are generated in the `output/` directory:
+Three files are generated in the output directory:
 
 | File | Description |
 |------|-------------|
 | `Page_Title.pdf` | A4 document PDF (cover + TOC + body + back page) |
-| `present_Page_Title.html` | Presentation HTML (can be presented directly in a browser) |
+| `present_Page_Title.html` | Presentation HTML (browser slideshow) |
 | `present_Page_Title.pdf` | Presentation PDF (16:9 slides) |
 
 ### Presentation Controls
-
-Open the presentation HTML in a browser to use it as a slideshow:
 
 | Action | Key |
 |--------|-----|
@@ -153,7 +146,7 @@ Open the presentation HTML in a browser to use it as a slideshow:
 | Previous slide | `←`, `↑`, `PageUp` |
 | Go to first slide | `Home` |
 | Go to last slide | `End` |
-| Mouse wheel | Scroll up/down to navigate slides |
+| Mouse wheel | Scroll up/down |
 | Open TOC | `T` |
 
 ## Dependencies
@@ -161,7 +154,7 @@ Open the presentation HTML in a browser to use it as a slideshow:
 | Package | Version | Role |
 |---------|---------|------|
 | `requests` | >= 2.28 | Confluence REST API calls |
-| `beautifulsoup4` | >= 4.12 | HTML parsing and Confluence macro conversion |
+| `beautifulsoup4` | >= 4.12 | HTML parsing and macro conversion |
 | `playwright` | >= 1.40 | Headless Chromium PDF rendering |
 | `flask` | >= 3.0 | Web GUI server |
 
@@ -169,17 +162,19 @@ Open the presentation HTML in a browser to use it as a slideshow:
 
 ```
 confluece_slide_and_pdf/
-├── Conf. Exporter.command    # macOS one-click launcher (Conda)
-├── start.bat                 # Windows one-click launcher (venv)
-├── setup.bat                 # Windows initial setup (venv, packages)
-├── requirements.txt          # Python package list (venv용)
+├── Conf. Exporter.command    # macOS one-click launcher (→ start.sh 위임)
+├── start.sh                  # macOS launcher (conda/venv 자동 감지)
+├── setup.sh                  # macOS 초기 설정 (conda/venv 자동 감지)
+├── start.bat                 # Windows launcher (conda/venv 자동 감지)
+├── setup.bat                 # Windows 초기 설정 (conda/venv 자동 감지)
+├── requirements.txt          # Python package list
 ├── app.py                    # Flask web GUI server
 ├── confluence_export.py      # Core export engine + CLI entry point
 ├── templates/
 │   └── index.html            # Web GUI template
 ├── static/
 │   └── pinklab_logo_text.png # Logo (symlink)
-├── pinklab_logo_text.png     # PinkLAB logo (cover/back pages)
+├── pinklab_logo_text.png     # PinkLAB logo
 ├── confluence_token.txt      # Auth config (not in git)
 ├── .gitignore
 ├── README.md
@@ -206,29 +201,14 @@ confluece_slide_and_pdf/
 
 ## Changelog
 
-### Windows File Open Bug Fix (`app.py`)
+### conda/venv 자동 감지 지원 (macOS + Windows)
 
-**증상**: 변환 완료 후 파일 링크를 클릭하면 아래와 같은 URL로 이동하며 파일이 열리지 않음
+`setup.sh` / `start.sh` (macOS 신규), `setup.bat` / `start.bat` (Windows 업데이트):
+conda가 설치되어 있으면 conda를, 없으면 venv를 자동으로 감지하여 실행합니다.
 
-```
-http://localhost:5001/api/files/C%3A%5CUsers%5C이름%5CDownloads%5Cfile.pdf
-```
+### Windows File Open Bug Fix (`app.py` + `templates/index.html`)
 
-**원인**: 기존 `/api/files/<path:filepath>` 방식은 macOS(`/Users/...`) 기준으로 설계되어, Windows 경로(`C:\Users\...`)의 드라이브 문자(`C:`)가 URL에 포함되면 경로가 올바르게 복원되지 않음
-
-**수정 내용**: 파일 서빙 방식을 경로 기반 → **job_id + 파일명 기반**으로 변경
-
-```
-# 기존 (macOS 전용)
-GET /api/files/C%3A%5CUsers%5C.../file.pdf
-
-# 수정 후 (Windows/macOS 공통)
-GET /api/files/{job_id}/{filename}
-```
-
-서버가 `job_id`로 출력 디렉토리를 조회한 뒤 파일명만으로 파일을 제공하므로, Windows 경로가 URL에 노출되지 않아 문제가 해결됨
-
-> **적용 방법**: `git pull` 후 `start.bat` 재실행
+파일 서빙 URL을 경로 기반 → `job_id + 파일명` 기반으로 변경하여 Windows 경로(`C:\...`)가 URL에 포함되던 문제를 해결했습니다.
 
 ---
 
