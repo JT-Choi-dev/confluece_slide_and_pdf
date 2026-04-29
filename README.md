@@ -19,26 +19,29 @@ It addresses the limitations of Confluence's built-in PDF exporter (e.g., missin
 
 ## Prerequisites
 
-- [Conda](https://docs.conda.io/) (Miniconda or Anaconda)
 - Confluence Cloud account + API Token
+- **macOS**: [Conda](https://docs.conda.io/) (Miniconda or Anaconda)
+- **Windows**: Python 3.10+ (no Conda required)
 
 ## Setup
 
-### 1. Create Conda Environment
+### macOS — Conda
+
+#### 1. Create Conda Environment
 
 ```bash
 conda create -n confluence python=3.11 -y
 conda activate confluence
 ```
 
-### 2. Install Packages
+#### 2. Install Packages
 
 ```bash
 pip install requests beautifulsoup4 playwright flask
 playwright install chromium
 ```
 
-### 3. Configure Authentication
+#### 3. Configure Authentication
 
 Create a `confluence_token.txt` file in the project root:
 
@@ -50,16 +53,57 @@ CONFLUENCE_API_TOKEN=your-api-token-here
 
 > You can generate an API Token at [Atlassian API Token Management](https://id.atlassian.com/manage-profile/security/api-tokens).
 
+---
+
+### Windows — Python venv
+
+> Conda 없이 Python 기본 가상환경(venv)으로 실행할 수 있습니다.
+
+#### 1. Clone & Setup (최초 1회)
+
+```bash
+git clone https://github.com/JT-Choi-dev/confluece_slide_and_pdf
+cd confluece_slide_and_pdf
+```
+
+`setup.bat`을 더블클릭하면 자동으로:
+- `venv` 가상환경 생성
+- 패키지 설치 (`requirements.txt`)
+- Playwright Chromium 설치
+
+#### 2. Configure Authentication
+
+프로젝트 루트에 `confluence_token.txt` 파일 생성:
+
+```
+CONFLUENCE_URL=https://your-domain.atlassian.net
+CONFLUENCE_EMAIL=your-email@example.com
+CONFLUENCE_API_TOKEN=your-api-token-here
+```
+
+#### 3. Run
+
+`start.bat`을 더블클릭하면 자동으로 venv를 활성화하고 브라우저에서 http://localhost:5001 을 열어줍니다.
+
+---
+
 ## Usage
 
 ### Web GUI (Recommended)
 
-**One-click launch** — double-click `start.command` in Finder. It activates conda, starts the server, and opens your browser automatically.
+**macOS** — double-click `Conf. Exporter.command` in Finder.
+
+**Windows** — double-click `start.bat`.
 
 Or manually:
 
 ```bash
+# macOS
 conda activate confluence
+python app.py
+
+# Windows
+venv\Scripts\activate
 python app.py
 ```
 
@@ -76,7 +120,11 @@ Open **http://localhost:5001** in your browser. The GUI provides:
 ### CLI
 
 ```bash
+# macOS
 conda activate confluence
+
+# Windows
+venv\Scripts\activate
 
 # Basic usage
 python confluence_export.py "https://your-domain.atlassian.net/wiki/spaces/SPACE/pages/PAGE_ID/Page+Title"
@@ -120,8 +168,11 @@ Open the presentation HTML in a browser to use it as a slideshow:
 ## File Structure
 
 ```
-confluence_print/
-├── start.command             # macOS one-click launcher (double-click)
+confluece_slide_and_pdf/
+├── Conf. Exporter.command    # macOS one-click launcher (Conda)
+├── start.bat                 # Windows one-click launcher (venv)
+├── setup.bat                 # Windows initial setup (venv, packages)
+├── requirements.txt          # Python package list (venv용)
 ├── app.py                    # Flask web GUI server
 ├── confluence_export.py      # Core export engine + CLI entry point
 ├── templates/
@@ -155,4 +206,3 @@ confluence_print/
 
 ## VIDEO
 [![YOUTUBE](https://img.youtube.com/vi/VcSHt-2HNkY/0.jpg)](https://www.youtube.com/watch?v=VcSHt-2HNkY)
-
