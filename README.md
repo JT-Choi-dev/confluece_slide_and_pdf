@@ -204,5 +204,33 @@ confluece_slide_and_pdf/
 | `ac:emoticon` | Unicode emoji |
 | Others | Graceful fallback (body content preserved) |
 
+## Changelog
+
+### Windows File Open Bug Fix (`app.py`)
+
+**증상**: 변환 완료 후 파일 링크를 클릭하면 아래와 같은 URL로 이동하며 파일이 열리지 않음
+
+```
+http://localhost:5001/api/files/C%3A%5CUsers%5C이름%5CDownloads%5Cfile.pdf
+```
+
+**원인**: 기존 `/api/files/<path:filepath>` 방식은 macOS(`/Users/...`) 기준으로 설계되어, Windows 경로(`C:\Users\...`)의 드라이브 문자(`C:`)가 URL에 포함되면 경로가 올바르게 복원되지 않음
+
+**수정 내용**: 파일 서빙 방식을 경로 기반 → **job_id + 파일명 기반**으로 변경
+
+```
+# 기존 (macOS 전용)
+GET /api/files/C%3A%5CUsers%5C.../file.pdf
+
+# 수정 후 (Windows/macOS 공통)
+GET /api/files/{job_id}/{filename}
+```
+
+서버가 `job_id`로 출력 디렉토리를 조회한 뒤 파일명만으로 파일을 제공하므로, Windows 경로가 URL에 노출되지 않아 문제가 해결됨
+
+> **적용 방법**: `git pull` 후 `start.bat` 재실행
+
+---
+
 ## VIDEO
 [![YOUTUBE](https://img.youtube.com/vi/VcSHt-2HNkY/0.jpg)](https://www.youtube.com/watch?v=VcSHt-2HNkY)
