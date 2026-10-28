@@ -10,7 +10,7 @@ import time
 import uuid
 from pathlib import Path
 
-from flask import Flask, jsonify, render_template, request, send_from_directory
+from flask import Flask, jsonify, render_template, request, send_from_directory, send_file
 
 import confluence_export as ce
 
@@ -23,6 +23,16 @@ jobs = {}
 @app.route("/")
 def index():
     return render_template("index.html")
+
+
+@app.route("/static/pinklab_logo_text.png")
+def serve_logo():
+    """Always serve the root-level logo file, ignoring the (possibly corrupt) static copy."""
+    logo_path = Path(__file__).parent / "pinklab_logo_text.png"
+    if logo_path.exists() and logo_path.stat().st_size > 1000:
+        return send_file(str(logo_path), mimetype="image/png")
+    # Fallback: static folder
+    return send_from_directory("static", "pinklab_logo_text.png")
 
 
 @app.route("/api/defaults", methods=["GET"])
