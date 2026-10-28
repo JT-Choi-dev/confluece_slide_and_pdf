@@ -780,18 +780,37 @@ def process_images(soup: BeautifulSoup) -> None:
                 alt_name = img_tag.get("ac:alt", "")
                 if alt_name:
                     filename = alt_name
+
+            # Check if image is attached to a different page (cross-page reference)
+            ref_page = attachment.find("ri:page")
+            cross_space = ""
+            cross_title = ""
+            if ref_page:
+                cross_space = ref_page.get("ri:space-key", "")
+                cross_title = ref_page.get("ri:content-title", "")
+
             if _is_video_file(filename):
-                video = soup.new_tag("video", attrs={
+                attrs = {
                     "controls": "",
                     "data-attachment-video": filename,
                     "style": "max-width:100%; max-height:100%;",
-                })
+                }
+                if cross_space:
+                    attrs["data-cross-space"] = cross_space
+                if cross_title:
+                    attrs["data-cross-title"] = cross_title
+                video = soup.new_tag("video", attrs=attrs)
                 video.string = filename
                 img_tag.replace_with(video)
                 continue
+
             img = soup.new_tag("img")
             img["data-attachment"] = filename
             img["alt"] = filename
+            if cross_space:
+                img["data-cross-space"] = cross_space
+            if cross_title:
+                img["data-cross-title"] = cross_title
         elif url_tag:
             img = soup.new_tag("img")
             img["src"] = url_tag.get("ri:value", "")
@@ -808,14 +827,66 @@ def process_images(soup: BeautifulSoup) -> None:
         img_tag.replace_with(img)
 
 
+def _find_page_id_by_title(space_key: str, title: str, session: requests.Session) -> str | None:
+    """Find a page ID by its space key and title using the Confluence API."""
+    try:
+        resp = session.get(
+            f"{CONFLUENCE_URL}/wiki/rest/api/content",
+            auth=get_auth(),
+            params={"spaceKey": space_key, "title": title, "limit": 1},
+            timeout=15
+        )
+        resp.raise_for_status()
+        results = resp.json().get("results", [])
+        if results:
+            return results[0]["id"]
+    except Exception as e:
+        print(f"  Warning: Could not find page '{title}' in space '{space_key}': {e}",
+              file=sys.stderr)
+    return None
+
+
 def resolve_attachment_images(soup: BeautifulSoup, page_id: str) -> None:
-    """Download attachment images and embed as base64."""
+    """Download attachment images and embed as base64.
+
+    Handles both same-page attachments and cross-page references
+    (where <ri:attachment> contains a <ri:page> child pointing to another page).
+    """
     session = get_session()
+
+    # Cache for resolved cross-page IDs: (space, title) -> page_id
+    cross_page_cache: dict[tuple, str | None] = {}
+
     for img in soup.find_all("img", attrs={"data-attachment": True}):
         filename = img["data-attachment"]
-        # Try v1 API for attachments (URL-encode filename for spaces/special chars)
+        cross_space = img.get("data-cross-space", "")
+        cross_title = img.get("data-cross-title", "")
+
+        # Determine which page's attachments to search
+        target_page_id = page_id
+        if cross_space and cross_title:
+            cache_key = (cross_space, cross_title)
+            if cache_key not in cross_page_cache:
+                print(f"  [cross-page] space={cross_space}, title={cross_title}")
+                cross_page_cache[cache_key] = _find_page_id_by_title(
+                    cross_space, cross_title, session
+                )
+            resolved = cross_page_cache[cache_key]
+            if resolved:
+                target_page_id = resolved
+            else:
+                print(f"  Warning: Could not resolve page '{cross_title}', "
+                      f"skipping image '{filename}'", file=sys.stderr)
+                # Clean up attrs and continue
+                del img["data-attachment"]
+                for attr in ["data-cross-space", "data-cross-title"]:
+                    if img.has_attr(attr):
+                        del img[attr]
+                continue
+
+        # Fetch attachment download URL
         att_url = (
-            f"{CONFLUENCE_URL}/wiki/rest/api/content/{page_id}"
+            f"{CONFLUENCE_URL}/wiki/rest/api/content/{target_page_id}"
             f"/child/attachment?filename={quote(filename)}"
         )
         try:
@@ -827,10 +898,21 @@ def resolve_attachment_images(soup: BeautifulSoup, page_id: str) -> None:
                 data_uri = download_image(download_path)
                 if data_uri:
                     img["src"] = data_uri
+                    print(f"  [OK] Embedded: {filename}")
+                else:
+                    print(f"  Warning: Could not download image '{filename}'", file=sys.stderr)
+            else:
+                print(f"  Warning: Attachment '{filename}' not found on page {target_page_id}",
+                      file=sys.stderr)
         except Exception as e:
             print(f"  Warning: Failed to resolve attachment '{filename}': {e}",
                   file=sys.stderr)
+
+        # Clean up data-* attributes
         del img["data-attachment"]
+        for attr in ["data-cross-space", "data-cross-title"]:
+            if img.has_attr(attr):
+                del img[attr]
 
 
 def resolve_attachment_videos(soup: BeautifulSoup, page_id: str, output_dir: str = "output") -> None:
